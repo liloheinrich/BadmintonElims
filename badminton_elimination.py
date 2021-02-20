@@ -9,6 +9,7 @@ import networkx as nx
 import itertools
 import cvxopt
 from itertools import combinations
+import copy
 
 
 class Division:
@@ -75,7 +76,7 @@ class Division:
         saturated_edges = self.create_network(teamID)
         if not flag1:
             if solver == "Network Flows":
-                flag1 = self.network_flows(saturated_edges)
+                flag1 = self.network_flows(saturated_edges, teamID)
             elif solver == "Linear Programming":
                 flag1 = self.linear_programming(saturated_edges)
 
@@ -130,10 +131,13 @@ class Division:
             self.G.add_edge(team_pair, team_pair[0], capacity=max_val)
             self.G.add_edge(team_pair, team_pair[1], capacity=max_val)
 
+        # print("\nCAPACITIES: ")
+        # for g in self.G:
+        #     print(g, self.G[g])
         # print(self.G.nodes())
         return saturated_edges
 
-    def network_flows(self, saturated_edges):
+    def network_flows(self, saturated_edges, teamID):
         '''Uses network flows to determine if the team with given team ID
         has been eliminated. You can feel free to use the built in networkx
         maximum flow function or the maximum flow function you implemented as
@@ -144,27 +148,52 @@ class Division:
         return: True if team is eliminated, False otherwise
         '''
 
-        flow_value, flow_dict = nx.maximum_flow(self.G, 'S', 'T', capacity='capacity', flow_func=None)
-        # print("flow_value", flow_value)
-        # print("flow_dict", flow_dict)
-        # print(flow_dict.keys())
+        # flow_value, flow_dict = nx.maximum_flow(self.G, 'S', 'T', capacity='capacity', flow_func=None)
+        # # print("flow_value", flow_value)
+        # # print("flow_dict", flow_dict)
+        # # print(flow_dict.keys())
 
+        # print("\nFLOWS: ")
         # for g in flow_dict:
         #     print(g, flow_dict[g])
         
-        ids = list(self.get_team_IDs())
-        # print("IDs", ids)
-        # print(self.G.nodes())
+        # ids = list(self.get_team_IDs())
+        # for i in ids:
+        #     # print("graph has team", i, self.G.has_node(i))
+        #     if self.G.has_node(i):
+        #         # print(self.G[i]['T']['capacity'],flow_dict[i]['T'])
+        #         if self.G[i]['T']['capacity'] == flow_dict[i]['T']:
+        #             print("HELLOO")
+        #             return True
 
+
+        G_copy = self.G.copy()
+        ids = list(self.get_team_IDs())
+        ids.remove(teamID)
+
+        print("IDS", ids)
 
         for i in ids:
-            # print("graph has team", i, self.G.has_node(i))
-            if self.G.has_node(i):
-                # print(self.G[i]['T']['capacity'],flow_dict[i]['T'])
-                if self.G[i]['T']['capacity'] == flow_dict[i]['T']:
-                    print("HELLOO")
-                    return True
+            ids_to_delete = copy.deepcopy(ids)
+            ids_to_delete.remove(i)
+            print(i, ids_to_delete)
 
+            for id in ids_to_delete:
+                G_copy.remove_node(id)
+
+            elim = self.check_max_flow(i)
+            if not elim:
+                return False
+            G_copy = self.G.copy()
+
+        return True
+
+    def check_max_flow(self, id):
+        # returns true if the player is eliminated in this scenario
+
+        flow_value, flow_dict = nx.maximum_flow(self.G, 'S', 'T', capacity='capacity', flow_func=None)
+        if self.G[id]['T']['capacity'] == flow_dict[id]['T']:
+            return True
         return False
 
     def linear_programming(self, saturated_edges):
