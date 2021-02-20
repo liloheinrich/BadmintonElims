@@ -148,45 +148,45 @@ class Division:
         return: True if team is eliminated, False otherwise
         '''
 
-        # flow_value, flow_dict = nx.maximum_flow(self.G, 'S', 'T', capacity='capacity', flow_func=None)
+        flow_value, flow_dict = nx.maximum_flow(self.G, 'S', 'T', capacity='capacity', flow_func=None)
+        # flow_value, flow_dict = nx.edmonds_karp(self.G, 'S', 'T', capacity='capacity')
         # # print("flow_value", flow_value)
         # # print("flow_dict", flow_dict)
-        # # print(flow_dict.keys())
 
         # print("\nFLOWS: ")
         # for g in flow_dict:
         #     print(g, flow_dict[g])
         
-        # ids = list(self.get_team_IDs())
-        # for i in ids:
-        #     # print("graph has team", i, self.G.has_node(i))
-        #     if self.G.has_node(i):
-        #         # print(self.G[i]['T']['capacity'],flow_dict[i]['T'])
-        #         if self.G[i]['T']['capacity'] == flow_dict[i]['T']:
-        #             print("HELLOO")
-        #             return True
-
-
-        G_copy = self.G.copy()
         ids = list(self.get_team_IDs())
-        ids.remove(teamID)
-
-        print("IDS", ids)
-
         for i in ids:
-            ids_to_delete = copy.deepcopy(ids)
-            ids_to_delete.remove(i)
-            print(i, ids_to_delete)
+            # print("graph has team", i, self.G.has_node(i))
+            if self.G.has_node(i):
+                # print(self.G[i]['T']['capacity'],flow_dict[i]['T'])
+                if self.G[i]['T']['capacity'] == flow_dict[i]['T']:
+                    print("HELLOO")
+                    return True
 
-            for id in ids_to_delete:
-                G_copy.remove_node(id)
 
-            elim = self.check_max_flow(i)
-            if not elim:
-                return False
-            G_copy = self.G.copy()
+        # G_copy = self.G.copy()
+        # ids = list(self.get_team_IDs())
+        # ids.remove(teamID)
 
-        return True
+        # print("IDS", ids)
+
+        # for i in ids:
+        #     ids_to_delete = copy.deepcopy(ids)
+        #     ids_to_delete.remove(i)
+        #     print(i, ids_to_delete)
+
+        #     for id in ids_to_delete:
+        #         G_copy.remove_node(id)
+
+        #     elim = self.check_max_flow(i)
+        #     if not elim:
+        #         return False
+        #     G_copy = self.G.copy()
+
+        # return True
 
     def check_max_flow(self, id):
         # returns true if the player is eliminated in this scenario
