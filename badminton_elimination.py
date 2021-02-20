@@ -1,13 +1,14 @@
 '''Code file for badminton elimination lab created for Advanced Algorithms
 Spring 2021 at Olin College. The code for this lab has been adapted from:
 https://github.com/ananya77041/baseball-elimination/blob/master/src/BaseballElimination.java'''
-
+import numpy
 import sys
 import math
-import picos as pic
+
+# import picos as pic
 import networkx as nx
-import itertools
-import cvxopt
+# import itertools
+# import cvxopt
 
 
 class Division:
@@ -92,9 +93,26 @@ class Division:
         '''
 
         saturated_edges = {}
+        team_ids = self.get_team_IDs()
+        print(teamID)
 
-        #TODO: implement this
+        for id in team_ids:
+            if id == teamID:
+                continue
+            for team, num_matches in enumerate(self.teams[id].against):
+                if (team == teamID) or (team == id):
+                    continue
+                if (id, team) in saturated_edges:
+                    print("this might not be necessary")
+                    continue
+                if (team, id) in saturated_edges:
+                    continue
+                else:
+                    saturated_edges[(id, team)] = num_matches
+                    label = str(team) + "," + str(id)
+                    self.G.add_edge('s', label, capacity=num_matches)
 
+        print(saturated_edges)
         return saturated_edges
 
     def network_flows(self, saturated_edges):
@@ -109,6 +127,7 @@ class Division:
         '''
 
         #TODO: implement this
+
 
         return False
 
