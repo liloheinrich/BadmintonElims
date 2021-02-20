@@ -8,6 +8,7 @@ import picos as pic
 import networkx as nx
 import itertools
 import cvxopt
+from itertools import combinations
 
 
 class Division:
@@ -91,10 +92,45 @@ class Division:
         the amount of additional games they have against each other
         '''
 
+        self.G.clear()
         saturated_edges = {}
 
-        #TODO: implement this
+        # get all team IDs excluding the team we're checking
+        ids = list(self.get_team_IDs())
+        ids.remove(teamID)
+        # print("IDs", ids)
 
+        self.G.add_node('S')
+        self.G.add_node('T')
+
+        # iterate through team IDs
+        for i in ids:
+            # number of wins required to beat the player we're checking for
+            needed_to_win = self.teams[teamID].wins + self.teams[teamID].remaining - self.teams[i].wins
+
+            # connect each team to the sink with the capacity calculated above
+            self.G.add_node(i)
+            self.G.add_edge(i, 'T', capacity=needed_to_win)
+
+        # get all team pairs excluding the player we're checking for
+        team_pairs = list(combinations(ids,2))
+        # print(team_pairs)
+
+        # iterate through team pairs
+        for team_pair in team_pairs:
+            # get how many games they need to play against each other
+            saturated_edges[team_pair] = self.teams[team_pair[0]].get_against(other_team=team_pair[1])
+
+            # connect from the source to each team pair with the capacity calculated above
+            self.G.add_node(team_pair)
+            self.G.add_edge('S', team_pair, capacity=saturated_edges[team_pair])
+
+            # either player can win the matches they play against eachother
+            max_val = float('inf');
+            self.G.add_edge(team_pair, team_pair[0], capacity=max_val)
+            self.G.add_edge(team_pair, team_pair[1], capacity=max_val)
+
+        # print(self.G.nodes())
         return saturated_edges
 
     def network_flows(self, saturated_edges):
@@ -108,7 +144,26 @@ class Division:
         return: True if team is eliminated, False otherwise
         '''
 
-        #TODO: implement this
+        flow_value, flow_dict = nx.maximum_flow(self.G, 'S', 'T', capacity='capacity', flow_func=None)
+        # print("flow_value", flow_value)
+        # print("flow_dict", flow_dict)
+        # print(flow_dict.keys())
+
+        # for g in flow_dict:
+        #     print(g, flow_dict[g])
+        
+        ids = list(self.get_team_IDs())
+        # print("IDs", ids)
+        # print(self.G.nodes())
+
+
+        for i in ids:
+            # print("graph has team", i, self.G.has_node(i))
+            if self.G.has_node(i):
+                # print(self.G[i]['T']['capacity'],flow_dict[i]['T'])
+                if self.G[i]['T']['capacity'] == flow_dict[i]['T']:
+                    print("HELLOO")
+                    return True
 
         return False
 
@@ -191,6 +246,7 @@ if __name__ == '__main__':
         filename = sys.argv[1]
         division = Division(filename)
         for (ID, team) in division.teams.items():
-            print(f'{team.name}: Eliminated? {division.is_eliminated(team.ID, "Linear Programming")}')
+            # print(f'{team.name}: Eliminated? {division.is_eliminated(team.ID, "Linear Programming")}')
+            print(f'{team.name}: Eliminated? {division.is_eliminated(team.ID, "Network Flows")}')
     else:
         print("To run this code, please specify an input file name. Example: python badminton_elimination.py teams2.txt.")

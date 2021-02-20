@@ -49,9 +49,9 @@ def test_teams4():
     '''
     division = Division("teams4.txt")
     for (ID, team) in division.teams.items():
-        if team.name == "Prava" or team.name == "Vicky":
+        if team.name == "Shashank" or team.name == "Cassandra":
             assert_eliminated(division, team)
-        elif team.name == "Emily" or team.name == "Shashank":
+        elif team.name == "Sherrie" or team.name == "Manu":
             assert_not_eliminated(division, team)
     print("test_teams4 completed")
 
