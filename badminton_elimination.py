@@ -128,9 +128,6 @@ class Division:
             self.G.add_edge(team_pair, team_pair[0], capacity=max_val)
             self.G.add_edge(team_pair, team_pair[1], capacity=max_val)
 
-        # print("\nCAPACITIES: ")
-        # for g in self.G:
-        #     print(g, self.G[g])
         return saturated_edges
 
     def network_flows(self, saturated_edges):
@@ -146,21 +143,17 @@ class Division:
 
         flow_value, flow_dict = nx.maximum_flow(self.G, 'S', 'T')
 
-        # print("\nFLOWS: ")
-        # for g in flow_dict:
-        #     print(g, flow_dict[g])
-
         for team_pair in saturated_edges:
 
             # check whether the max flow has saturated this edge
             if saturated_edges[team_pair] > flow_dict['S'][team_pair]:
 
-                # if max flow uses less than the matches left to be played, it means they're eliminated.
-                # the edges holding num of matches needed to win must've been maxxed out even without playing
-                # the rest of the games, meaning they have already lost before all of the games were played
+                """ If max flow uses less than the matches left to be played, they're eliminated. The
+                edges holding num of matches needed to win must've been maxxed out even without playing
+                all the games, meaning they're going to lose once the rest of the games are played. """
                 return True 
 
-        # only reach this line if they're not eliminated
+        # only reaches this line if they're not eliminated
         return False
 
     def linear_programming(self, saturated_edges):
