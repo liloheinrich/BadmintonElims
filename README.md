@@ -2,7 +2,7 @@
 The full lab description can be found [here](/Lab_0.pdf).
 
 **Implement the network flows and the linear programming approach to the problem in
-Python (we are providing input files and starter code).**
+Python (input files and starter code provided).**
 
 1. Make a fork of this github repo
 2. Use `pip install -r requirements.txt` to install the requirements for the
