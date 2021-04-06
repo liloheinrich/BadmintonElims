@@ -1,4 +1,4 @@
-This repo is for part 2 of Lab 0: Badminton Elimination, which is explained below.
+# Lab 0: Badminton Elimination
 The full lab description can be found [here](/Lab_0.pdf).
 
 **Implement the network flows and the linear programming approach to the problem in
